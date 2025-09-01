@@ -1,0 +1,148 @@
+name: Build LocatorApp Executables
+
+# Trigger: setiap push ke main branch atau manual
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  # Manual trigger dari GitHub web interface
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+
+    - name: Test imports
+      run: |
+        python -c "import modules; print('✓ Modules package OK')"
+        python -c "import modules.calculate_locator; print('✓ calculate_locator OK')"
+        python -c "import modules.gui_controller; print('✓ gui_controller OK')"
+        python -c "import modules.interface; print('✓ interface OK')"
+        python -c "import modules.serial_process; print('✓ serial_process OK')"
+
+    - name: Build Windows executable
+      run: |
+        pyinstaller --onefile --windowed --name=LocatorApp-Windows --hidden-import=modules.calculate_locator --hidden-import=modules.gui_controller --hidden-import=modules.interface --hidden-import=modules.serial_process main.py
+
+    - name: Test executable exists
+      run: |
+        if (Test-Path "dist/LocatorApp-Windows.exe") {
+          Write-Host "✓ Executable created successfully"
+          $size = (Get-Item "dist/LocatorApp-Windows.exe").Length / 1MB
+          Write-Host "📊 File size: $([math]::Round($size, 1)) MB"
+        } else {
+          Write-Host "❌ Executable not found"
+          exit 1
+        }
+
+    - name: Upload Windows executable
+      uses: actions/upload-artifact@v4
+      with:
+        name: LocatorApp-Windows
+        path: dist/LocatorApp-Windows.exe
+        retention-days: 30
+
+  build-linux:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libxcb-xinerama0 libxcb-cursor0
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+
+    - name: Test imports
+      run: |
+        python -c "import modules; print('✓ Modules package OK')"
+        python -c "import modules.calculate_locator; print('✓ calculate_locator OK')"
+        python -c "import modules.gui_controller; print('✓ gui_controller OK')"
+        python -c "import modules.interface; print('✓ interface OK')"
+        python -c "import modules.serial_process; print('✓ serial_process OK')"
+
+    - name: Build Linux executable
+      run: |
+        pyinstaller --onefile --windowed --name=LocatorApp-Linux --hidden-import=modules.calculate_locator --hidden-import=modules.gui_controller --hidden-import=modules.interface --hidden-import=modules.serial_process main.py
+
+    - name: Test executable exists
+      run: |
+        if [ -f "dist/LocatorApp-Linux" ]; then
+          echo "✓ Executable created successfully"
+          size=$(du -m dist/LocatorApp-Linux | cut -f1)
+          echo "📊 File size: ${size} MB"
+          chmod +x dist/LocatorApp-Linux
+        else
+          echo "❌ Executable not found"
+          exit 1
+        fi
+
+    - name: Upload Linux executable
+      uses: actions/upload-artifact@v4
+      with:
+        name: LocatorApp-Linux
+        path: dist/LocatorApp-Linux
+        retention-days: 30
+
+  # Create release jika ada tag
+  create-release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [build-windows, build-linux]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          LocatorApp-Windows/LocatorApp-Windows.exe
+          LocatorApp-Linux/LocatorApp-Linux
+        draft: false
+        prerelease: false
+        body: |
+          ## LocatorApp Release
+          
+          ### Downloads:
+          - **Windows**: `LocatorApp-Windows.exe`
+          - **Linux**: `LocatorApp-Linux`
+          
+          ### Installation:
+          - **Windows**: Download and double-click to run
+          - **Linux**: Download, make executable (`chmod +x LocatorApp-Linux`), then run
+          
+          ### Changes:
+          - Auto-generated release from GitHub Actions
+          
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
