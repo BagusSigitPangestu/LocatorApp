@@ -110,12 +110,12 @@ def main():
         return
     
     # Konfirmasi build
-    print(f"\nProject directory: {Path(__file__).parent.parent}")
-    confirm = input("Mulai build? (y/n): ").lower().strip()
+    # print(f"\nProject directory: {Path(__file__).parent.parent}")
+    # confirm = input("Mulai build? (y/n): ").lower().strip()
     
-    if confirm != 'y':
-        print("Build dibatalkan.")
-        return
+    # if confirm != 'y':
+    #     print("Build dibatalkan.")
+    #     return
     
     # Bersihkan build sebelumnya
     clean_previous_build()
@@ -125,10 +125,10 @@ def main():
     
     if success:
         print("\n🎉 Build selesai!")
-        print("\n📋 Langkah selanjutnya:")
-        print("1. Test executable di folder dist/")
-        print("2. Test di komputer lain (tanpa Python)")
-        print("3. Buat installer jika diperlukan")
+        # print("\n📋 Langkah selanjutnya:")
+        # print("1. Test executable di folder dist/")
+        # print("2. Test di komputer lain (tanpa Python)")
+        # print("3. Buat installer jika diperlukan")
     else:
         print("\n❌ Build gagal. Periksa error di atas.")
 

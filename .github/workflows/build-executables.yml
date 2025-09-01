@@ -30,11 +30,11 @@ jobs:
 
     - name: Test imports
       run: |
-        python -c "import modules; print('✓ Modules package OK')"
-        python -c "import modules.calculate_locator; print('✓ calculate_locator OK')"
-        python -c "import modules.gui_controller; print('✓ gui_controller OK')"
-        python -c "import modules.interface; print('✓ interface OK')"
-        python -c "import modules.serial_process; print('✓ serial_process OK')"
+        python -c "import modules; print('Modules package OK')"
+        python -c "import modules.calculate_locator; print('calculate_locator OK')"
+        python -c "import modules.gui_controller; print('gui_controller OK')"
+        python -c "import modules.interface; print('interface OK')"
+        python -c "import modules.serial_process; print('serial_process OK')"
 
     - name: Build Windows executable
       run: |
@@ -43,11 +43,11 @@ jobs:
     - name: Test executable exists
       run: |
         if (Test-Path "dist/LocatorApp-Windows.exe") {
-          Write-Host "✓ Executable created successfully"
+          Write-Host "Executable created successfully"
           $size = (Get-Item "dist/LocatorApp-Windows.exe").Length / 1MB
-          Write-Host "📊 File size: $([math]::Round($size, 1)) MB"
+          Write-Host "File size: $([math]::Round($size, 1)) MB"
         } else {
-          Write-Host "❌ Executable not found"
+          Write-Host "ERROR: Executable not found"
           exit 1
         }
 
@@ -83,11 +83,11 @@ jobs:
 
     - name: Test imports
       run: |
-        python -c "import modules; print('✓ Modules package OK')"
-        python -c "import modules.calculate_locator; print('✓ calculate_locator OK')"
-        python -c "import modules.gui_controller; print('✓ gui_controller OK')"
-        python -c "import modules.interface; print('✓ interface OK')"
-        python -c "import modules.serial_process; print('✓ serial_process OK')"
+        python -c "import modules; print('Modules package OK')"
+        python -c "import modules.calculate_locator; print('calculate_locator OK')"
+        python -c "import modules.gui_controller; print('gui_controller OK')"
+        python -c "import modules.interface; print('interface OK')"
+        python -c "import modules.serial_process; print('serial_process OK')"
 
     - name: Build Linux executable
       run: |
@@ -96,12 +96,12 @@ jobs:
     - name: Test executable exists
       run: |
         if [ -f "dist/LocatorApp-Linux" ]; then
-          echo "✓ Executable created successfully"
+          echo "Executable created successfully"
           size=$(du -m dist/LocatorApp-Linux | cut -f1)
-          echo "📊 File size: ${size} MB"
+          echo "File size: ${size} MB"
           chmod +x dist/LocatorApp-Linux
         else
-          echo "❌ Executable not found"
+          echo "ERROR: Executable not found"
           exit 1
         fi
 
